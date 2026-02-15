@@ -14,4 +14,5 @@ private:
     bool error_ = false;
 
     void skipWhitespace();
+    bool parseInteger(int& value);
 };
