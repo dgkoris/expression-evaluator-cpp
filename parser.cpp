@@ -8,6 +8,7 @@ Parser::Parser(std::string expression)
 {
 }
 
+// Skips whitespace.
 void Parser::skipWhitespace()
 {
     while (pos_ < expr_.size() && std::isspace(static_cast<unsigned char>(expr_[pos_])))
@@ -16,6 +17,7 @@ void Parser::skipWhitespace()
     }
 }
 
+// Reads an integer value and detects overflow safely.
 bool Parser::parseInteger(long long& value)
 {
     skipWhitespace();
@@ -47,6 +49,10 @@ bool Parser::parseInteger(long long& value)
     return true;
 }
 
+// Parses the smallest unit of an expression:
+//  - integer values
+//  - parenthesised expressions
+//  - unary + and -
 long long Parser::parseValue()
 {
     skipWhitespace();
@@ -92,6 +98,7 @@ long long Parser::parseValue()
     return negate ? -value : value;
 }
 
+// Evaluates expressions left to right using + - * / (no precedence).
 long long Parser::parseExpression()
 {
     long long result = parseValue();
@@ -134,6 +141,7 @@ long long Parser::parseExpression()
     return result;
 }
 
+// Reads the next operator if present.
 char Parser::parseOperator()
 {
     skipWhitespace();
@@ -153,6 +161,7 @@ char Parser::parseOperator()
     return '\0';
 }
 
+// Entry point that validates and evaluates the full expression.
 bool Parser::evaluate(int& result)
 {
     long long temp = parseExpression();
