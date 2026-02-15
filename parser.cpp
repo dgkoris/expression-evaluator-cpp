@@ -1,6 +1,7 @@
 #include "parser.h"
 #include <utility>
 #include <cctype>
+#include <limits>
 
 Parser::Parser(std::string expression)
     : expr_(std::move(expression))
@@ -15,16 +16,9 @@ void Parser::skipWhitespace()
     }
 }
 
-bool Parser::parseInteger(int& value)
+bool Parser::parseInteger(long long& value)
 {
     skipWhitespace();
-
-    bool negative = false;
-    if (pos_ < expr_.size() && (expr_[pos_] == '+' || expr_[pos_] == '-'))
-    {
-        negative = (expr_[pos_] == '-');
-        ++pos_;
-    }
 
     if (pos_ >= expr_.size() ||
         !std::isdigit(static_cast<unsigned char>(expr_[pos_])))
@@ -38,19 +32,22 @@ bool Parser::parseInteger(int& value)
     while (pos_ < expr_.size() &&
            std::isdigit(static_cast<unsigned char>(expr_[pos_])))
     {
-        value = value * 10 + (expr_[pos_] - '0');
-        ++pos_;
-    }
+        int digit = expr_[pos_] - '0';
 
-    if (negative)
-    {
-        value = -value;
+        if (value > (std::numeric_limits<long long>::max() - digit) / 10)
+        {
+            error_ = true;
+            return false;
+        }
+
+        value = value * 10 + digit;
+        ++pos_;
     }
 
     return true;
 }
 
-int Parser::parseValue()
+long long Parser::parseValue()
 {
     skipWhitespace();
 
@@ -64,7 +61,7 @@ int Parser::parseValue()
         skipWhitespace();
     }
 
-    int value = 0;
+    long long value = 0;
 
     // If we see '(' then parse inner expression.
     if (pos_ < expr_.size() && expr_[pos_] == '(')
@@ -95,9 +92,9 @@ int Parser::parseValue()
     return negate ? -value : value;
 }
 
-int Parser::parseExpression()
+long long Parser::parseExpression()
 {
-    int result = parseValue();
+    long long result = parseValue();
 
     if (error_)
     {
@@ -112,7 +109,7 @@ int Parser::parseExpression()
             break;
         }
 
-        const int value = parseValue();
+        const long long value = parseValue();
         if (error_)
         {
             return 0;
@@ -158,9 +155,23 @@ char Parser::parseOperator()
 
 bool Parser::evaluate(int& result)
 {
-    result = parseExpression();
+    long long temp = parseExpression();
 
     skipWhitespace();
 
-    return !error_ && pos_ == expr_.size();
+    if (error_ || pos_ != expr_.size())
+    {
+        result = 0;
+        return false;
+    }
+
+    if (temp < std::numeric_limits<int>::min() ||
+        temp > std::numeric_limits<int>::max())
+    {
+        result = 0;
+        return false;
+    }
+
+    result = static_cast<int>(temp);
+    return true;
 }

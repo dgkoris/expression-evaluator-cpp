@@ -14,8 +14,8 @@ private:
     bool error_ = false;
 
     void skipWhitespace();
-    bool parseInteger(int& value);
-    int parseValue();
-    int parseExpression();
+    bool parseInteger(long long& value);
+    long long parseValue();
+    long long parseExpression();
     char parseOperator();
 };
