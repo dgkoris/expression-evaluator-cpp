@@ -54,12 +54,24 @@ int Parser::parseValue()
 {
     skipWhitespace();
 
+    bool negate = false;
+
+    // Handle + or -.
+    if (pos_ < expr_.size() && (expr_[pos_] == '+' || expr_[pos_] == '-'))
+    {
+        negate = (expr_[pos_] == '-');
+        ++pos_;
+        skipWhitespace();
+    }
+
+    int value = 0;
+
     // If we see '(' then parse inner expression.
     if (pos_ < expr_.size() && expr_[pos_] == '(')
     {
         ++pos_; // Skip '('.
 
-        int value = parseExpression();
+        value = parseExpression();
 
         skipWhitespace();
 
@@ -70,29 +82,78 @@ int Parser::parseValue()
         }
 
         ++pos_; // Skip ')'.
-        return value;
     }
-
     // Otherwise parse an integer.
-    int value = 0;
-    if (!parseInteger(value))
+    else
     {
-        return 0;
+        if (!parseInteger(value))
+        {
+            return 0;
+        }
     }
 
-    return value;
+    return negate ? -value : value;
 }
 
 int Parser::parseExpression()
 {
-    int value = parseValue();
+    int result = parseValue();
 
     if (error_)
     {
         return 0;
     }
 
-    return value;
+    while (!error_)
+    {
+        const char op = parseOperator();
+        if (op == '\0')
+        {
+            break;
+        }
+
+        const int value = parseValue();
+        if (error_)
+        {
+            return 0;
+        }
+
+        switch (op)
+        {
+            case '+': result += value; break;
+            case '-': result -= value; break;
+            case '*': result *= value; break;
+            case '/':
+                if (value == 0)
+                {
+                    error_ = true;
+                    return 0;
+                }
+                result /= value;
+                break;
+        }
+    }
+
+    return result;
+}
+
+char Parser::parseOperator()
+{
+    skipWhitespace();
+
+    if (pos_ >= expr_.size())
+    {
+        return '\0';
+    }
+
+    const char c = expr_[pos_];
+    if (c == '+' || c == '-' || c == '*' || c == '/')
+    {
+        ++pos_;
+        return c;
+    }
+
+    return '\0';
 }
 
 bool Parser::evaluate(int& result)

@@ -17,4 +17,5 @@ private:
     bool parseInteger(int& value);
     int parseValue();
     int parseExpression();
+    char parseOperator();
 };
