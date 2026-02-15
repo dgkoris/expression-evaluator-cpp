@@ -15,4 +15,6 @@ private:
 
     void skipWhitespace();
     bool parseInteger(int& value);
+    int parseValue();
+    int parseExpression();
 };

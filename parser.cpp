@@ -50,15 +50,56 @@ bool Parser::parseInteger(int& value)
     return true;
 }
 
+int Parser::parseValue()
+{
+    skipWhitespace();
+
+    // If we see '(' then parse inner expression.
+    if (pos_ < expr_.size() && expr_[pos_] == '(')
+    {
+        ++pos_; // Skip '('.
+
+        int value = parseExpression();
+
+        skipWhitespace();
+
+        if (pos_ >= expr_.size() || expr_[pos_] != ')')
+        {
+            error_ = true;
+            return 0;
+        }
+
+        ++pos_; // Skip ')'.
+        return value;
+    }
+
+    // Otherwise parse an integer.
+    int value = 0;
+    if (!parseInteger(value))
+    {
+        return 0;
+    }
+
+    return value;
+}
+
+int Parser::parseExpression()
+{
+    int value = parseValue();
+
+    if (error_)
+    {
+        return 0;
+    }
+
+    return value;
+}
+
 bool Parser::evaluate(int& result)
 {
-    if (!parseInteger(result))
-    {
-        result = 0;
-        return false;
-    }
+    result = parseExpression();
 
     skipWhitespace();
 
-    return pos_ == expr_.size();
+    return !error_ && pos_ == expr_.size();
 }
