@@ -40,3 +40,5 @@ app
 
 # debug information files
 *.dwo
+app.dSYM/Contents/Info.plist
+app.dSYM/Contents/Resources/Relocations/aarch64/app.yml
