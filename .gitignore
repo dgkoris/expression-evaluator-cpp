@@ -42,3 +42,7 @@ app
 *.dwo
 app.dSYM/Contents/Info.plist
 app.dSYM/Contents/Resources/Relocations/aarch64/app.yml
+tests
+tests.dSYM/Contents/Info.plist
+tests.dSYM/Contents/Resources/DWARF/tests
+tests.dSYM/Contents/Resources/Relocations/aarch64/tests.yml
