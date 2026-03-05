@@ -17,9 +17,10 @@ static bool runParserTests(IWriter& out)
     {
         {"42", true, 42},
         {"-5", true, -5},
-        {"1+3*4", true, 16},
+        {"1+3*4", true, 13},
+
         {"1+(3*4)", true, 13},
-        {"-(2+(3+5)*2)", true, -20},
+        {"-(2+(3+5)*2)", true, -18},
 
         // Division by zero
         {"5/0", false, 0},
